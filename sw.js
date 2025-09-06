@@ -1,4 +1,4 @@
-const CACHE_NAME = "conri-micronation-v6";
+const CACHE_NAME = "conri-micronation-v7";
 const ASSETS = [
   "./",
   "./index.html",
