@@ -62,3 +62,6 @@ ul#citizens li { background:#222; margin:.4rem 0; padding:.6rem .8rem; border-ra
 @media (prefers-reduced-motion: reduce) {
   #splash { transition: none; }
 }
+/* style.css */
+body.splashing { overflow: hidden; }   /* lås scroll under splash */
+#splash { transition: opacity .4s ease, visibility .4s ease; } /* snabbare ut */
