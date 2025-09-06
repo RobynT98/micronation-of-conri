@@ -52,3 +52,9 @@ ul#citizens li { background:#222; margin:.4rem 0; padding:.6rem .8rem; border-ra
   font-size: 1.2em;
   opacity: 0.9;
 }
+/* Splash – redan befintlig */
+#splash { position:fixed; inset:0; background:#8B0000; color:#eee;
+  display:grid; place-items:center; text-align:center; z-index:9999;
+  transition:opacity .35s ease, visibility .35s ease; }
+#splash.hide { opacity:0; visibility:hidden; pointer-events:none; }
+body.splashing { overflow:hidden; } /* lås scroll medan splash syns */
