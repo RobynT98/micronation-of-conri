@@ -44,3 +44,34 @@ function renderCitizens() {
 
 // Kör render direkt när sidan laddas
 renderCitizens();
+// Custom splash: visa bara första besöket per device
+const SPLASH_KEY = "conri_seen_splash_v1";
+
+function hideSplash() {
+  const el = document.getElementById("splash");
+  if (!el) return;
+  el.classList.add("hide");
+  // ta bort från DOM efter transition (lite städning)
+  el.addEventListener("transitionend", () => el.remove(), { once: true });
+}
+
+(function initSplash(){
+  const seen = localStorage.getItem(SPLASH_KEY) === "1";
+  // visa alltid om man INTE sett den tidigare
+  if (!seen) {
+    // minstid så det hinner kännas avsiktligt
+    const minTime = new Promise(res => setTimeout(res, 900));
+    // vänta på att DOM laddats klart
+    const domReady = new Promise(res => {
+      if (document.readyState === "complete") res();
+      else window.addEventListener("load", res, { once: true });
+    });
+    Promise.all([minTime, domReady]).then(() => {
+      hideSplash();
+      localStorage.setItem(SPLASH_KEY, "1");
+    });
+  } else {
+    // om användaren redan sett splash → göm direkt
+    window.addEventListener("load", hideSplash, { once: true });
+  }
+})();
