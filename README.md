@@ -1,16 +1,21 @@
 # Micronation of Conri
 
-Welcome to the official repository of the **Micronation of Conri**.  
-This project is a progressive web app (PWA) representing the laws, citizens, and culture of the realm.
+![Flag](icon-512.png)
 
-## Features
-- Constitution with basic laws
-- Citizen registry (localStorage-based)
-- Custom icons and manifest for PWA
+**Motto:** _Strength through play, order through chaos_
 
-## Motto
-*Strength through play, order through chaos*
+## Constitution
+1. Respect the hierarchy of the realm.  
+2. Roleplay is binding within the borders.  
+3. Currency of the realm is earned, not given.
 
----
+## How to Join
+Visit the website and become part of the citizen registry.  
+Roles: Sovereign (default), Advisor, Vassal, Citizen
 
-Made with ❤️ in 2025.
+## Tech Notes
+- PWA enabled with `manifest.json` + `sw.js`  
+- Offline support + GitHub Pages hosting  
+- Client-only logic (no backend)
+
+> “A nation built on code, humor, and shared imagination.”
