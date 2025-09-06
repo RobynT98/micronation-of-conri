@@ -1,9 +1,9 @@
 /* ========================
-   Micronation of Conri – app.js
+   Micronation of Conri – app.js (coins edition)
    ======================== */
 
 /* ---------- Citizens (localStorage) ---------- */
-const STORAGE_KEY = "conri_citizens_v1";
+const STORAGE_KEY = "conri_citizens_v2";
 
 function loadCitizens() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
@@ -15,30 +15,81 @@ function saveCitizens(list) {
 
 let citizens = loadCitizens();
 
+// migrate gamla poster utan coins/role/since
+citizens = citizens.map(c => ({
+  name: c.name || c,
+  role: c.role || "Citizen",
+  since: c.since || new Date().toISOString(),
+  coins: typeof c.coins === "number" ? c.coins : 0
+}));
+
 // Seed Sovereign om tomt
 if (citizens.length === 0) {
-  citizens = [{ name: "Conri", role: "Sovereign", since: new Date().toISOString() }];
+  citizens = [{
+    name: "Conri",
+    role: "Sovereign",
+    since: new Date().toISOString(),
+    coins: 0
+  }];
   saveCitizens(citizens);
 }
 
+/* Helpers */
 function addCitizen(name, role = "Citizen") {
   if (!name || !name.trim()) return;
   const clean = name.trim();
 
-  // undvik dubbletter (case-insensitive)
   if (citizens.some(c => c.name.toLowerCase() === clean.toLowerCase())) {
     alert("That citizen already exists.");
     return;
   }
-  citizens.push({ name: clean, role, since: new Date().toISOString() });
+  citizens.push({ name: clean, role, since: new Date().toISOString(), coins: 0 });
   saveCitizens(citizens);
   renderCitizens();
 }
-
 function removeCitizen(index) {
   citizens.splice(index, 1);
   saveCitizens(citizens);
   renderCitizens();
+}
+
+/* --- Currency logic --- */
+function earnCoin(index, amount = 1) {
+  citizens[index].coins += amount;
+  if (citizens[index].coins < 0) citizens[index].coins = 0;
+  saveCitizens(citizens);
+  renderCitizens();
+}
+
+/* --- UI wiring --- */
+(function wireCitizenInputs(){
+  const form = document.getElementById("citizen-form");
+  const nameInput = document.getElementById("citizen-name");
+  const roleSelect = document.getElementById("citizen-role");
+
+  if (form && nameInput) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      addCitizen(nameInput.value, roleSelect ? roleSelect.value : "Citizen");
+      nameInput.value = "";
+      if (roleSelect) roleSelect.value = "Citizen";
+    });
+  } else {
+    // fallback om man vill anropa via knapp: onclick="addCitizenPrompt()"
+    window.addCitizenPrompt = function () {
+      const name = prompt("Enter your citizen name:");
+      if (name) addCitizen(name, "Citizen");
+    };
+  }
+})();
+
+function roleIcon(role) {
+  switch ((role || "").toLowerCase()) {
+    case "sovereign": return "👑";
+    case "advisor":   return "📜";
+    case "vassal":    return "⚔️";
+    default:          return "👤";
+  }
 }
 
 function renderCitizens() {
@@ -53,49 +104,49 @@ function renderCitizens() {
 
   citizens.forEach((c, i) => {
     const li = document.createElement("li");
+
     const since = new Date(c.since).toLocaleDateString();
-    li.textContent = `${c.name} — ${c.role} (since ${since})`;
+    li.innerHTML = `
+      <span>${roleIcon(c.role)} <strong>${c.name}</strong> — ${c.role} • ${c.coins} coins <small>(since ${since})</small></span>
+    `;
 
-    // Remove-knapp
-    const btn = document.createElement("button");
-    btn.textContent = "×";
-    btn.title = "Remove";
-    btn.style.float = "right";
-    btn.style.background = "#333";
-    btn.style.color = "#eee";
-    btn.style.border = "0";
-    btn.style.borderRadius = "6px";
-    btn.style.padding = "0 .5rem";
-    btn.onclick = () => removeCitizen(i);
+    // Btns container
+    const actions = document.createElement("div");
+    actions.style.float = "right";
+    actions.style.display = "flex";
+    actions.style.gap = "6px";
 
-    li.appendChild(btn);
+    // Earn +1 (arbete)
+    const earnBtn = document.createElement("button");
+    earnBtn.textContent = "Earn +1";
+    earnBtn.title = "Work to earn 1 coin";
+    earnBtn.onclick = () => earnCoin(i, 1);
+
+    // Ceremoniell +1 / -1
+    const plusBtn = document.createElement("button");
+    plusBtn.textContent = "+1";
+    plusBtn.title = "Grant 1 coin";
+    plusBtn.onclick = () => earnCoin(i, 1);
+
+    const minusBtn = document.createElement("button");
+    minusBtn.textContent = "−1";
+    minusBtn.title = "Deduct 1 coin";
+    minusBtn.onclick = () => earnCoin(i, -1);
+
+    // Remove
+    const rmBtn = document.createElement("button");
+    rmBtn.textContent = "×";
+    rmBtn.title = "Remove citizen";
+    rmBtn.onclick = () => removeCitizen(i);
+
+    actions.appendChild(earnBtn);
+    actions.appendChild(plusBtn);
+    actions.appendChild(minusBtn);
+    actions.appendChild(rmBtn);
+    li.appendChild(actions);
     list.appendChild(li);
   });
 }
-
-/* Stöder både form i HTML och prompt-fallback */
-(function wireCitizenInputs(){
-  const form = document.getElementById("citizen-form");
-  const nameInput = document.getElementById("citizen-name");
-  const roleSelect = document.getElementById("citizen-role");
-
-  if (form && nameInput) {
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const name = nameInput.value;
-      const role = roleSelect ? roleSelect.value : "Citizen";
-      addCitizen(name, role);
-      if (nameInput) nameInput.value = "";
-      if (roleSelect) roleSelect.value = "Citizen";
-    });
-  } else {
-    // fallback: global funktion för ev. knapp onclick="addCitizenPrompt()"
-    window.addCitizenPrompt = function () {
-      const name = prompt("Enter your citizen name:");
-      if (name) addCitizen(name, "Citizen");
-    };
-  }
-})();
 
 renderCitizens();
 
@@ -131,8 +182,6 @@ renderCitizens();
 /* ---------- Service Worker (offline) ---------- */
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch(() => {
-      // tyst fail – sw är valfri
-    });
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
   });
 }
