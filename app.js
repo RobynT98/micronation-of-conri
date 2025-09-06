@@ -224,3 +224,6 @@ function postDecree(){
   setAdminUI(localStorage.getItem(ADMIN_FLAG) === "1");
   renderDecrees();
 })();
+if (navigator.serviceWorker?.controller) {
+  navigator.serviceWorker.controller.postMessage("SKIP_WAITING");
+}
