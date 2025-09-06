@@ -30,3 +30,8 @@ section {
   border-radius: 8px;
   max-width: 400px;
 }
+form { display:flex; gap:.5rem; justify-content:center; margin:1rem 0; flex-wrap:wrap; }
+input, select, button { padding:.6rem .8rem; border-radius:8px; border:0; }
+button { background:#444; color:#eee; }
+ul#citizens { list-style:none; padding:0; max-width:420px; margin:1rem auto; text-align:left; }
+ul#citizens li { background:#222; margin:.4rem 0; padding:.6rem .8rem; border-radius:8px; }
