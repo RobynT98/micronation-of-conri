@@ -1,122 +1,113 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Micronation of Conri</title>
 
-  <!-- PWA / assets -->
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="style.css" />
 
-  <!-- Basic meta -->
-  <meta name="description" content="Micronation of Conri — Strength through play, order through chaos." />
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- Tap-to-enter overlay -->
-  <div id="splash" aria-hidden="true">
-    <div class="splash__inner">
+  <!-- First-run overlay (tap to enter) -->
+  <div id="splash">
+    <div>
       <h1>Micronation of Conri</h1>
       <p class="motto">Strength through play, order through chaos.</p>
       <small>(tap to enter)</small>
     </div>
   </div>
 
-  <!-- Site header -->
-  <header class="hero" role="banner">
-    <div class="container">
-      <h1 class="site-title">Micronation of Conri</h1>
-      <p class="motto">Strength through play, order through chaos.</p>
-    </div>
+  <!-- Hero -->
+  <header class="splash" role="banner">
+    <h1>Micronation of Conri</h1>
+    <p class="motto">Strength through play, order through chaos.</p>
   </header>
 
-  <!-- Optional nav anchors (if you want jump links later) -->
-  <nav class="site-nav container" aria-label="Primary">
-    <ul>
+  <!-- Quick nav -->
+  <nav aria-label="Sections">
+    <ul style="list-style:none; padding:0; margin:0; display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap;">
       <li><a href="#citizens">Citizens</a></li>
-      <li><a href="#council-contact">Council & Contact</a></li>
+      <li><a href="#council">Council &amp; Contact</a></li>
       <li><a href="#decrees">Decrees</a></li>
       <li><a href="#constitution">Constitution</a></li>
     </ul>
   </nav>
 
-  <main id="main" class="container">
+  <main>
+
     <!-- Citizens -->
-    <section id="citizens" aria-labelledby="citizens-h">
-      <h2 id="citizens-h">Citizens</h2>
+    <section id="citizens" aria-labelledby="citizens-title">
+      <h2 id="citizens-title">Citizens</h2>
 
-      <form id="citizen-form" class="card" autocomplete="off">
-        <fieldset>
-          <legend class="sr-only">Join the realm</legend>
-
-          <label for="citizen-name">Name</label>
-          <input id="citizen-name" name="name" placeholder="Citizen name" required />
-
-          <label for="citizen-role">Role</label>
-          <select id="citizen-role" name="role">
-            <option value="Citizen">Citizen</option>
-            <option value="Vassal">Vassal</option>
-            <option value="Advisor">Advisor</option>
-            <option value="Sovereign">Sovereign</option>
-          </select>
-
-          <button type="submit">Join</button>
-        </fieldset>
+      <!-- Join form (IDs match app.js) -->
+      <form id="citizen-form" autocomplete="off">
+        <input id="citizen-name" name="citizen-name" placeholder="Citizen name" required />
+        <select id="citizen-role" name="citizen-role">
+          <option value="Citizen">Citizen</option>
+          <option value="Vassal">Vassal</option>
+          <option value="Advisor">Advisor</option>
+          <option value="Sovereign">Sovereign</option>
+        </select>
+        <button type="submit">Join</button>
       </form>
 
-      <ul id="citizens" class="list list--citizens" aria-live="polite"></ul>
+      <!-- Listan renderas av app.js -->
+      <ul id="citizens"></ul>
     </section>
 
-    <!-- Council & Contact (moved out of the form) -->
-    <section id="council-contact" aria-labelledby="council-h">
-      <h2 id="council-h">Council &amp; Contact</h2>
+    <!-- Council & Contact -->
+    <section id="council" aria-labelledby="council-title">
+      <h2 id="council-title">Council &amp; Contact</h2>
       <div class="social">
-        <a class="button" href="https://discord.gg/AYmwFtFn" target="_blank" rel="noopener">Join the Discord</a>
-        <a class="button button--ghost" href="mailto:sovereign@conri.realm">Email the Sovereign</a>
+        <a href="https://discord.gg/AYmwFtFn" target="_blank" rel="noopener">Join the Discord</a>
+        <a href="mailto:sovereign@conri.realm">Email the Sovereign</a>
       </div>
     </section>
 
-    <!-- Decrees (admin panel preserved, just structured) -->
-    <section id="decrees" aria-labelledby="decrees-h">
-      <h2 id="decrees-h">Decrees of the Realm</h2>
+    <!-- Decrees (admin toy) -->
+    <section aria-labelledby="decrees-title">
+      <h2 id="decrees-title">Decrees of the Realm</h2>
 
-      <div id="decree-admin" class="admin card">
+      <!-- Admin panel (IDs match app.js) -->
+      <div id="decree-admin">
         <button id="admin-login" type="button">Unlock Council</button>
 
-        <div id="admin-panel" hidden>
-          <label for="decree-text" class="sr-only">Decree text</label>
-          <textarea id="decree-text" placeholder="Proclaim a decree..." rows="4"></textarea>
-
-          <div class="admin__actions">
-            <button id="decree-post" type="button">Publish Decree</button>
-            <button id="admin-logout" type="button" class="button--ghost">Lock</button>
-          </div>
+        <div id="admin-panel" style="display:none">
+          <textarea id="decree-text" placeholder="Proclaim a decree..."></textarea>
+          <button id="decree-post" type="button">Publish Decree</button>
+          <button id="admin-logout" type="button">Lock</button>
         </div>
       </div>
 
-      <ul id="decrees-list" class="list list--decrees"></ul>
+      <!-- Decree list renderas av app.js -->
+      <ul id="decrees"></ul>
     </section>
 
     <!-- Constitution -->
-    <section id="constitution" aria-labelledby="constitution-h">
-      <h2 id="constitution-h">Constitution</h2>
-      <ol class="laws">
-        <li class="law">Respect the hierarchy of the realm.</li>
-        <li class="law">Roleplay is binding within the borders.</li>
-        <li class="law">Currency of the realm is earned, not given.</li>
-      </ol>
+    <section id="constitution" aria-labelledby="constitution-title">
+      <h2 id="constitution-title">Constitution</h2>
+
+      <div class="law"><strong>Law 1:</strong> Respect the hierarchy of the realm.</div>
+      <div class="law"><strong>Law 2:</strong> Roleplay is binding within the borders.</div>
+      <div class="law"><strong>Law 3:</strong> Currency of the realm is earned, not given.</div>
     </section>
+
   </main>
 
-  <footer class="site-footer container">
-    <small>© <span id="year"></span> Micronation of Conri</small>
+  <footer style="opacity:.75; padding:2rem 0;">
+    © <span id="year"></span> Micronation of Conri
   </footer>
 
+  <!-- Scripts -->
   <script>
-    // tiny helper so footer year stays fresh
+    // årtal i footer
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
-  <script src="app.js" defer></script>
+  <script src="app.js"></script>
 </body>
-  </html>
+</html>
