@@ -66,3 +66,6 @@ body.splashing { overflow:hidden; } /* lås scroll medan splash syns */
 }
 #citizens button:hover { background:#444; }
 #citizens li { position:relative; overflow:hidden; }
+.social { display:flex; gap:.6rem; flex-wrap:wrap; justify-content:center; }
+.social a { background:#222; color:#eee; padding:.6rem .9rem; border-radius:10px; text-decoration:none; }
+.social a:hover { background:#333; }
