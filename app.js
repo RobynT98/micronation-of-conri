@@ -1,182 +1,159 @@
 /* ========================
-   Micronation of Conri – app.js (coins edition)
+   Micronation of Conri — app.js (refined)
    ======================== */
 
-/* ---------- Citizens (localStorage) ---------- */
-const STORAGE_KEY = "conri_citizens_v2";
+/* ---------- Utils ---------- */
+const jsonGet = (k, d) => {
+  try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; }
+  catch { return d; }
+};
+const jsonSet = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+const fmtDate = (iso) => new Date(iso).toLocaleDateString();
+const by = (sel) => document.querySelector(sel);
 
-function loadCitizens() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-  catch { return []; }
-}
-function saveCitizens(list) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-}
+/* ---------- Constants ---------- */
+const STORAGE_KEY   = "conri_citizens_v2";
+const DECREE_KEY    = "conri_decrees_v1";
+const ADMIN_FLAG    = "conri_admin_v1";
+const ADMIN_SECRETK = "conri_admin_secret_v1"; // (valfritt) lagra egen lösenfras här
 
-let citizens = loadCitizens();
+const ROLES = /** sorteringsvikt & ikon */ {
+  Sovereign: { w: 100, icon: "👑" },
+  Advisor:   { w: 80,  icon: "📜" },
+  Vassal:    { w: 60,  icon: "⚔️" },
+  Citizen:   { w: 10,  icon: "👤" }
+};
+const roleInfo = (r) => ROLES[r] || ROLES.Citizen;
 
-// migrate gamla poster utan coins/role/since
-citizens = citizens.map(c => ({
-  name: c.name || c,
-  role: c.role || "Citizen",
+/* ---------- Citizens (state + persistence) ---------- */
+let citizens = jsonGet(STORAGE_KEY, []).map(c => ({
+  name:  c.name || String(c || "").trim(),
+  role:  c.role || "Citizen",
   since: c.since || new Date().toISOString(),
-  coins: typeof c.coins === "number" ? c.coins : 0
+  coins: Number.isFinite(c.coins) ? c.coins : 0
 }));
 
-// Seed Sovereign om tomt
+// seed om tomt
 if (citizens.length === 0) {
-  citizens = [{
-    name: "Conri",
-    role: "Sovereign",
-    since: new Date().toISOString(),
-    coins: 0
-  }];
-  saveCitizens(citizens);
+  citizens = [{ name: "Conri", role: "Sovereign", since: new Date().toISOString(), coins: 0 }];
+  jsonSet(STORAGE_KEY, citizens);
 }
 
-/* Helpers */
+const saveCitizens = () => jsonSet(STORAGE_KEY, citizens);
+const sortCitizens = () => citizens.sort((a,b) => {
+  const rw = roleInfo(b.role).w - roleInfo(a.role).w;
+  if (rw) return rw;
+  return a.name.localeCompare(b.name, undefined, { sensitivity:"base" });
+});
+
+/* ---------- Citizen CRUD ---------- */
 function addCitizen(name, role = "Citizen") {
-  if (!name || !name.trim()) return;
-  const clean = name.trim();
+  const clean = (name || "").trim();
+  if (!clean) return;
 
   if (citizens.some(c => c.name.toLowerCase() === clean.toLowerCase())) {
     alert("That citizen already exists.");
     return;
   }
   citizens.push({ name: clean, role, since: new Date().toISOString(), coins: 0 });
-  saveCitizens(citizens);
-  renderCitizens();
+  saveCitizens(); renderCitizens();
 }
 function removeCitizen(index) {
   citizens.splice(index, 1);
-  saveCitizens(citizens);
-  renderCitizens();
+  saveCitizens(); renderCitizens();
 }
-
-/* --- Currency logic --- */
 function earnCoin(index, amount = 1) {
-  citizens[index].coins += amount;
-  if (citizens[index].coins < 0) citizens[index].coins = 0;
-  saveCitizens(citizens);
-  renderCitizens();
+  citizens[index].coins = Math.max(0, (citizens[index].coins || 0) + amount);
+  saveCitizens(); renderCitizens();
 }
 
-/* --- UI wiring --- */
-(function wireCitizenInputs(){
-  const form = document.getElementById("citizen-form");
-  const nameInput = document.getElementById("citizen-name");
-  const roleSelect = document.getElementById("citizen-role");
+/* ---------- Citizen UI ---------- */
+(function wireCitizenForm(){
+  const form  = by("#citizen-form");
+  const nameI = by("#citizen-name");
+  const roleS = by("#citizen-role");
 
-  if (form && nameInput) {
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      addCitizen(nameInput.value, roleSelect ? roleSelect.value : "Citizen");
-      nameInput.value = "";
-      if (roleSelect) roleSelect.value = "Citizen";
-    });
-  } else {
-    // fallback om man vill anropa via knapp: onclick="addCitizenPrompt()"
-    window.addCitizenPrompt = function () {
-      const name = prompt("Enter your citizen name:");
-      if (name) addCitizen(name, "Citizen");
-    };
-  }
+  if (!form) return;
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    addCitizen(nameI.value, roleS ? roleS.value : "Citizen");
+    nameI.value = "";
+    if (roleS) roleS.value = "Citizen";
+  });
 })();
 
-function roleIcon(role) {
-  switch ((role || "").toLowerCase()) {
-    case "sovereign": return "👑";
-    case "advisor":   return "📜";
-    case "vassal":    return "⚔️";
-    default:          return "👤";
-  }
-}
-
 function renderCitizens() {
-  const list = document.getElementById("citizens");
+  const list = by("#citizens");
   if (!list) return;
+
+  sortCitizens();
   list.innerHTML = "";
 
   if (citizens.length === 0) {
-    list.innerHTML = `<li>No citizens yet.</li>`;
+    list.innerHTML = `<li class="card">No citizens yet.</li>`;
     return;
   }
 
   citizens.forEach((c, i) => {
     const li = document.createElement("li");
-
-    const since = new Date(c.since).toLocaleDateString();
+    li.className = "card";
     li.innerHTML = `
-      <span>${roleIcon(c.role)} <strong>${c.name}</strong> — ${c.role} • ${c.coins} coins <small>(since ${since})</small></span>
+      <div style="display:flex; gap:.6rem; align-items:center; justify-content:space-between; flex-wrap:wrap">
+        <span>
+          ${roleInfo(c.role).icon}
+          <strong>${c.name}</strong>
+          — ${c.role}
+          <span class="badge" title="Realm coins">${c.coins} coins</span>
+          <small class="meta">since ${fmtDate(c.since)}</small>
+        </span>
+        <div class="actions" role="group" aria-label="coin actions" style="display:flex; gap:6px;">
+          <button data-act="earn"  data-i="${i}" title="Work to earn 1 coin">Earn +1</button>
+          <button data-act="plus"  data-i="${i}" title="Grant 1 coin">+1</button>
+          <button data-act="minus" data-i="${i}" title="Deduct 1 coin">−1</button>
+          <button data-act="rm"    data-i="${i}" title="Remove citizen">×</button>
+        </div>
+      </div>
     `;
-
-    // Btns container
-    const actions = document.createElement("div");
-    actions.style.float = "right";
-    actions.style.display = "flex";
-    actions.style.gap = "6px";
-
-    // Earn +1 (arbete)
-    const earnBtn = document.createElement("button");
-    earnBtn.textContent = "Earn +1";
-    earnBtn.title = "Work to earn 1 coin";
-    earnBtn.onclick = () => earnCoin(i, 1);
-
-    // Ceremoniell +1 / -1
-    const plusBtn = document.createElement("button");
-    plusBtn.textContent = "+1";
-    plusBtn.title = "Grant 1 coin";
-    plusBtn.onclick = () => earnCoin(i, 1);
-
-    const minusBtn = document.createElement("button");
-    minusBtn.textContent = "−1";
-    minusBtn.title = "Deduct 1 coin";
-    minusBtn.onclick = () => earnCoin(i, -1);
-
-    // Remove
-    const rmBtn = document.createElement("button");
-    rmBtn.textContent = "×";
-    rmBtn.title = "Remove citizen";
-    rmBtn.onclick = () => removeCitizen(i);
-
-    actions.appendChild(earnBtn);
-    actions.appendChild(plusBtn);
-    actions.appendChild(minusBtn);
-    actions.appendChild(rmBtn);
-    li.appendChild(actions);
     list.appendChild(li);
   });
 }
 
+/* event delegation för knapparna */
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-act]");
+  if (!btn) return;
+  const i = Number(btn.dataset.i);
+  switch (btn.dataset.act) {
+    case "earn":  earnCoin(i, 1);  break;
+    case "plus":  earnCoin(i, 1);  break;
+    case "minus": earnCoin(i, -1); break;
+    case "rm":    removeCitizen(i); break;
+  }
+});
+
 renderCitizens();
 
-/* ---------- First-run Splash (tap or auto-hide) ---------- */
+/* ---------- First-run Splash ---------- */
 (function initSplash(){
-  const el = document.getElementById("splash");
-  if (!el) return;
-
+  const el = by("#splash"); if (!el) return;
   const KEY = "conri_seen_splash_v1";
-  const seen = localStorage.getItem(KEY) === "1";
-
-  if (seen) { el.remove(); return; }
+  if (localStorage.getItem(KEY) === "1") { el.remove(); return; }
 
   document.body.classList.add("splashing");
 
-  function closeSplash() {
+  const close = () => {
     document.body.classList.remove("splashing");
     el.classList.add("hide");
     el.addEventListener("transitionend", () => el.remove(), { once:true });
     localStorage.setItem(KEY, "1");
-  }
+  };
 
-  el.addEventListener("click", closeSplash);
-
-  const minTime = new Promise(r => setTimeout(r, 800));
-  const domReady = new Promise(r => {
-    if (document.readyState === "complete") r();
-    else window.addEventListener("load", r, { once:true });
-  });
-  Promise.all([minTime, domReady]).then(closeSplash);
+  el.addEventListener("click", close);
+  Promise.all([
+    new Promise(r => setTimeout(r, 800)),
+    new Promise(r => (document.readyState === "complete") ? r() : window.addEventListener("load", r, { once:true }))
+  ]).then(close);
 })();
 
 /* ---------- Service Worker (offline) ---------- */
@@ -185,21 +162,20 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js").catch(() => {});
   });
 }
-/* ---------- Decree system (toy admin) ---------- */
-const DECREE_KEY = "conri_decrees_v1";
-const ADMIN_FLAG = "conri_admin_v1";
-const ADMIN_PASSPHRASE = "BLACK-SIGIL-2025"; // byt till något eget
 
-function loadDecrees(){ try { return JSON.parse(localStorage.getItem(DECREE_KEY)) || []; } catch { return []; } }
-function saveDecrees(list){ localStorage.setItem(DECREE_KEY, JSON.stringify(list)); }
+/* ---------- Decrees (toy admin) ---------- */
+let decrees = jsonGet(DECREE_KEY, []);
 
-let decrees = loadDecrees();
+const getPassphrase = () =>
+  localStorage.getItem(ADMIN_SECRETK) || "BLACK-SIGIL-2025"; // byt/lagra egen via console: localStorage.setItem('conri_admin_secret_v1','DIN-FRAS')
 
 function renderDecrees(){
-  const ul = document.getElementById("decrees");
-  if (!ul) return;
+  const ul = by("#decrees"); if (!ul) return;
   ul.innerHTML = "";
-  if (decrees.length === 0) { ul.innerHTML = "<li>No decrees yet.</li>"; return; }
+  if (decrees.length === 0) {
+    ul.innerHTML = `<li class="card">No decrees yet.</li>`;
+    return;
+  }
   decrees.slice().reverse().forEach(d => {
     const li = document.createElement("li");
     li.innerHTML = `${d.text.replace(/\n/g,"<br>")}<time>${new Date(d.ts).toLocaleString()}</time>`;
@@ -208,47 +184,43 @@ function renderDecrees(){
 }
 
 function setAdminUI(enabled){
-  const loginBtn = document.getElementById("admin-login");
-  const panel = document.getElementById("admin-panel");
-  if (!loginBtn || !panel) return;
-  loginBtn.style.display = enabled ? "none" : "inline-block";
-  panel.style.display = enabled ? "grid" : "none";
+  const loginBtn = by("#admin-login");
+  const panel    = by("#admin-panel");
+  if (loginBtn) loginBtn.style.display = enabled ? "none" : "inline-block";
+  if (panel)    panel.style.display    = enabled ? "grid" : "none";
 }
 
 function enableAdmin(){
   const pass = prompt("Council passphrase:");
-  if (pass && pass === ADMIN_PASSPHRASE){
+  if (pass && pass === getPassphrase()){
     localStorage.setItem(ADMIN_FLAG, "1");
     setAdminUI(true);
   } else {
     alert("The sigil rejects you.");
   }
 }
-
 function disableAdmin(){
   localStorage.removeItem(ADMIN_FLAG);
   setAdminUI(false);
 }
-
 function postDecree(){
-  const ta = document.getElementById("decree-text");
+  const ta = by("#decree-text");
   if (!ta || !ta.value.trim()) return;
   decrees.push({ text: ta.value.trim(), ts: Date.now() });
-  saveDecrees(decrees);
+  jsonSet(DECREE_KEY, decrees);
   ta.value = "";
   renderDecrees();
 }
 
 (function wireDecrees(){
-  const loginBtn = document.getElementById("admin-login");
-  const postBtn  = document.getElementById("decree-post");
-  const logoutBtn= document.getElementById("admin-logout");
+  const loginBtn  = by("#admin-login");
+  const postBtn   = by("#decree-post");
+  const logoutBtn = by("#admin-logout");
 
-  if (loginBtn)  loginBtn.onclick = enableAdmin;
-  if (postBtn)   postBtn.onclick  = postDecree;
-  if (logoutBtn) logoutBtn.onclick= disableAdmin;
+  if (loginBtn)  loginBtn.addEventListener("click", enableAdmin);
+  if (postBtn)   postBtn.addEventListener("click",  postDecree);
+  if (logoutBtn) logoutBtn.addEventListener("click",disableAdmin);
 
   setAdminUI(localStorage.getItem(ADMIN_FLAG) === "1");
   renderDecrees();
 })();
-
