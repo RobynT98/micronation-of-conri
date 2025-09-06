@@ -42,36 +42,36 @@ function renderCitizens() {
   });
 }
 
-// Kör render direkt när sidan laddas
-renderCitizens();
-// Custom splash: visa bara första besöket per device
-const SPLASH_KEY = "conri_seen_splash_v1";
-
-function hideSplash() {
+// One-time splash with tap-to-dismiss
+(function initSplash(){
   const el = document.getElementById("splash");
   if (!el) return;
-  el.classList.add("hide");
-  // ta bort från DOM efter transition (lite städning)
-  el.addEventListener("transitionend", () => el.remove(), { once: true });
-}
 
-(function initSplash(){
-  const seen = localStorage.getItem(SPLASH_KEY) === "1";
-  // visa alltid om man INTE sett den tidigare
-  if (!seen) {
-    // minstid så det hinner kännas avsiktligt
-    const minTime = new Promise(res => setTimeout(res, 900));
-    // vänta på att DOM laddats klart
-    const domReady = new Promise(res => {
-      if (document.readyState === "complete") res();
-      else window.addEventListener("load", res, { once: true });
-    });
-    Promise.all([minTime, domReady]).then(() => {
-      hideSplash();
-      localStorage.setItem(SPLASH_KEY, "1");
-    });
-  } else {
-    // om användaren redan sett splash → göm direkt
-    window.addEventListener("load", hideSplash, { once: true });
+  const KEY = "conri_seen_splash_v1";
+  const seen = localStorage.getItem(KEY) === "1";
+
+  // om den redan setts, ta bort direkt
+  if (seen) { el.remove(); return; }
+
+  // lås scroll medan splashen syns
+  document.body.classList.add("splashing");
+
+  // auto-stäng efter ~800 ms (och när sidan är redo)
+  function closeSplash() {
+    document.body.classList.remove("splashing");
+    el.classList.add("hide");
+    el.addEventListener("transitionend", () => el.remove(), { once:true });
+    localStorage.setItem(KEY, "1");
   }
+
+  // stäng vid klick/touch
+  el.addEventListener("click", closeSplash);
+
+  // säkerställ att den försvinner även utan klick
+  const minTime = new Promise(r => setTimeout(r, 800));
+  const domReady = new Promise(r => {
+    if (document.readyState === "complete") r();
+    else window.addEventListener("load", r, { once:true });
+  });
+  Promise.all([minTime, domReady]).then(closeSplash);
 })();
