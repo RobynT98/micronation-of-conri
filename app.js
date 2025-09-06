@@ -185,3 +185,70 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js").catch(() => {});
   });
 }
+/* ---------- Decree system (toy admin) ---------- */
+const DECREE_KEY = "conri_decrees_v1";
+const ADMIN_FLAG = "conri_admin_v1";
+const ADMIN_PASSPHRASE = "BLACK-SIGIL-2025"; // byt till något eget
+
+function loadDecrees(){ try { return JSON.parse(localStorage.getItem(DECREE_KEY)) || []; } catch { return []; } }
+function saveDecrees(list){ localStorage.setItem(DECREE_KEY, JSON.stringify(list)); }
+
+let decrees = loadDecrees();
+
+function renderDecrees(){
+  const ul = document.getElementById("decrees");
+  if (!ul) return;
+  ul.innerHTML = "";
+  if (decrees.length === 0) { ul.innerHTML = "<li>No decrees yet.</li>"; return; }
+  decrees.slice().reverse().forEach(d => {
+    const li = document.createElement("li");
+    li.innerHTML = `${d.text.replace(/\n/g,"<br>")}<time>${new Date(d.ts).toLocaleString()}</time>`;
+    ul.appendChild(li);
+  });
+}
+
+function setAdminUI(enabled){
+  const loginBtn = document.getElementById("admin-login");
+  const panel = document.getElementById("admin-panel");
+  if (!loginBtn || !panel) return;
+  loginBtn.style.display = enabled ? "none" : "inline-block";
+  panel.style.display = enabled ? "grid" : "none";
+}
+
+function enableAdmin(){
+  const pass = prompt("Council passphrase:");
+  if (pass && pass === ADMIN_PASSPHRASE){
+    localStorage.setItem(ADMIN_FLAG, "1");
+    setAdminUI(true);
+  } else {
+    alert("The sigil rejects you.");
+  }
+}
+
+function disableAdmin(){
+  localStorage.removeItem(ADMIN_FLAG);
+  setAdminUI(false);
+}
+
+function postDecree(){
+  const ta = document.getElementById("decree-text");
+  if (!ta || !ta.value.trim()) return;
+  decrees.push({ text: ta.value.trim(), ts: Date.now() });
+  saveDecrees(decrees);
+  ta.value = "";
+  renderDecrees();
+}
+
+(function wireDecrees(){
+  const loginBtn = document.getElementById("admin-login");
+  const postBtn  = document.getElementById("decree-post");
+  const logoutBtn= document.getElementById("admin-logout");
+
+  if (loginBtn)  loginBtn.onclick = enableAdmin;
+  if (postBtn)   postBtn.onclick  = postDecree;
+  if (logoutBtn) logoutBtn.onclick= disableAdmin;
+
+  setAdminUI(localStorage.getItem(ADMIN_FLAG) === "1");
+  renderDecrees();
+})();
+
