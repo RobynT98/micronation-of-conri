@@ -1,76 +1,247 @@
-body {
-  font-family: sans-serif;
-  background: #111;
-  color: #eee;
-  text-align: center;
-  margin: 0;
+/* ===========================
+   Micronation of Conri — Arcane Theme
+   =========================== */
+
+/* --- CSS-variabler (lätt att tweaka) --- */
+:root{
+  --bg-0:#0b0b10;           /* djup natt */
+  --bg-1:#12121a;           /* yta */
+  --bg-2:#1c1c28;           /* kort */
+  --text:#eae7ff;           /* grundtext */
+  --muted:#b9b4d0;
+  --gold:#ffdf5d;
+  --royal:#7a5cff;          /* accent lila */
+  --blood:#8b0000;          /* din röda */
+  --ok:#4bd1a0;
+  --warn:#ff9d4d;
+  --shadow: 0 10px 25px rgba(0,0,0,.35);
 }
 
-header {
-  padding: 2rem;
-  background: #222;
+/* --- Bas --- */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family: ui-rounded, "Trebuchet MS", system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif;
+  background: var(--bg-0);
+  color: var(--text);
+  margin:0;
+  text-align:center;
+  line-height:1.55;
 }
 
-h1 {
-  font-size: 2.2rem;
+/* Subtil stjärnhimmel */
+body::before, body::after{
+  content:"";
+  position:fixed; inset:0; pointer-events:none; z-index:-1;
+}
+body::before{
+  background:
+    radial-gradient(circle at 10% 20%, rgba(122,92,255,.10) 0 25%, transparent 26%),
+    radial-gradient(circle at 80% 10%, rgba(139,0,0,.12) 0 22%, transparent 23%),
+    radial-gradient(circle at 70% 80%, rgba(255,223,93,.06) 0 28%, transparent 29%),
+    linear-gradient(180deg, #0b0b10 0%, #0b0b10 40%, #0f0f16 100%);
+  filter:saturate(1.1);
+}
+body::after{
+  background:
+    radial-gradient(2px 2px at 20% 30%, #ffffff55 99%, transparent),
+    radial-gradient(1.5px 1.5px at 60% 20%, #ffffff55 99%, transparent),
+    radial-gradient(1.8px 1.8px at 85% 70%, #ffffff44 99%, transparent),
+    radial-gradient(1.2px 1.2px at 35% 80%, #ffffff33 99%, transparent);
+  animation: twinkle 8s linear infinite;
+  opacity:.8;
+}
+@keyframes twinkle{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-4px)}
 }
 
-.flag {
-  font-size: 4rem;
+/* --- Hero/header --- */
+header.splash{
+  padding:72px 20px 36px;
+  background:
+    radial-gradient(1200px 300px at 50% -40%, rgba(122,92,255,.35), transparent 60%),
+    linear-gradient(180deg, #1a1225 0, #111018 70%);
+  border-bottom:1px solid #2b2440;
+  position:relative;
+  overflow:hidden;
+}
+header.splash::after{
+  content:"";
+  position:absolute; inset:0;
+  background:
+    radial-gradient(800px 120px at 50% 0, rgba(255,223,93,.08), transparent 60%);
+  pointer-events:none;
+}
+h1{
+  font-size: clamp(2rem, 3.2vw + 1rem, 3rem);
+  letter-spacing:.5px;
+  text-shadow: 0 2px 20px rgba(122,92,255,.35);
+  margin:0 0 .35rem;
+}
+.motto{
+  font-style:italic;
+  color:var(--muted);
+  margin:0;
 }
 
-section {
-  margin: 2rem 0;
+/* --- Navigering (om du använder <nav class="site-nav"> …) --- */
+.site-nav{margin:18px 0}
+.site-nav ul{
+  list-style:none; padding:0; margin:0;
+  display:flex; gap:.6rem; justify-content:center; flex-wrap:wrap;
+}
+.site-nav a{
+  text-decoration:none; color:var(--gold);
+  background:linear-gradient(180deg, #2a2438, #1d1a28);
+  border:1px solid #3a3150;
+  padding:.5rem .85rem; border-radius:10px;
+  box-shadow: var(--shadow);
+  transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+}
+.site-nav a:hover{
+  transform:translateY(-1px);
+  box-shadow:0 12px 28px rgba(122,92,255,.25);
+  background:linear-gradient(180deg, #3a3054, #221c34);
+  color:#100f14;
 }
 
-.law {
-  background: #222;
-  margin: 0.5rem auto;
-  padding: 0.8rem;
-  border-radius: 8px;
-  max-width: 400px;
+/* --- Sektioner --- */
+main{padding:26px 16px 60px; max-width:1040px; margin:0 auto}
+section{margin:34px auto 40px}
+
+/* Ornamenterade rubriker */
+h2{
+  font-size: clamp(1.35rem, 1.6vw + .6rem, 1.75rem);
+  margin:0 0 14px;
+  position:relative;
+  display:inline-block;
+  padding:6px 14px;
+  background: linear-gradient(180deg, #231b31, #1c1528);
+  border:1px solid #3a2f51;
+  border-radius:12px;
+  box-shadow: inset 0 0 0 1px rgba(255,223,93,.05), 0 10px 25px rgba(0,0,0,.3);
 }
-form { display:flex; gap:.5rem; justify-content:center; margin:1rem 0; flex-wrap:wrap; }
-input, select, button { padding:.6rem .8rem; border-radius:8px; border:0; }
-button { background:#444; color:#eee; }
-ul#citizens { list-style:none; padding:0; max-width:420px; margin:1rem auto; text-align:left; }
-ul#citizens li { background:#222; margin:.4rem 0; padding:.6rem .8rem; border-radius:8px; }
-.splash {
-  background: linear-gradient(180deg, #600000, #000000);
-  color: #fff;
-  text-align: center;
-  padding: 60px 20px;
+h2::before, h2::after{
+  content:""; position:absolute; top:50%; width:70px; height:1px;
+  background:linear-gradient(90deg, transparent, #3a3150, transparent);
+}
+h2::before{right:100%; margin-right:10px}
+h2::after{left:100%; margin-left:10px}
+
+/* --- Knappar & inputs --- */
+button, .btn{
+  background: linear-gradient(180deg, #2a2339, #1f1a2b);
+  color:var(--text);
+  border:1px solid #3a3150;
+  padding:.65rem .9rem;
+  border-radius:10px;
+  cursor:pointer;
+  transition:transform .12s ease, box-shadow .12s ease, background .2s ease;
+  box-shadow: var(--shadow);
+}
+button:hover,.btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 12px 28px rgba(122,92,255,.25);
+}
+button:active{transform:translateY(0)}
+
+input, select, textarea{
+  background:#1a1822; color:var(--text);
+  border:1px solid #2e2840; border-radius:10px;
+  padding:.6rem .8rem; outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+input:focus, select:focus, textarea:focus{
+  border-color:#4c3b86;
+  box-shadow:0 0 0 3px rgba(122,92,255,.25);
 }
 
-.splash h1 {
-  font-size: 2em;
-  margin: 0 0 10px;
+/* Form layout */
+form{display:flex; gap:.6rem; justify-content:center; margin:1.1rem 0; flex-wrap:wrap}
+
+/* --- Cards/listor --- */
+.card{
+  background: linear-gradient(180deg, var(--bg-2), #181822);
+  border:1px solid #2c2740; border-radius:12px;
+  padding:.8rem .9rem;
+  box-shadow: var(--shadow);
+}
+ul{margin:0; padding:0}
+ul#citizens{list-style:none; max-width:560px; margin:1rem auto; text-align:left}
+ul#citizens li{
+  composes: card;
+  background: linear-gradient(180deg, #1b1b27, #15151f);
+  display:flex; align-items:center; justify-content:space-between;
+  gap:.6rem;
+}
+#citizens .meta{opacity:.8; font-size:.95em}
+
+/* Snabba statuschips (roller, mynt) */
+.badge{
+  display:inline-block; padding:.2rem .5rem; border-radius:999px;
+  font-size:.85em; border:1px solid #423765; background:#1c172b; color:var(--gold)
 }
 
-.splash .motto {
-  font-style: italic;
-  font-size: 1.2em;
-  opacity: 0.9;
+/* --- Lagtexter --- */
+.law{
+  background: linear-gradient(180deg, #1c1c28, #15151f);
+  border:1px solid #2c2740; border-radius:12px;
+  padding:.9rem 1rem; max-width:640px; margin:.55rem auto;
+  box-shadow: var(--shadow);
 }
-/* Splash – redan befintlig */
-#splash { position:fixed; inset:0; background:#8B0000; color:#eee;
-  display:grid; place-items:center; text-align:center; z-index:9999;
-  transition:opacity .35s ease, visibility .35s ease; }
-#splash.hide { opacity:0; visibility:hidden; pointer-events:none; }
-body.splashing { overflow:hidden; } /* lås scroll medan splash syns */
 
-/* actions-knappar i listan */
-#citizens button {
-  background:#333; color:#eee; border:0; border-radius:8px;
-  padding:.35rem .6rem; cursor:pointer;
+/* --- Splash (första öppning) --- */
+#splash{
+  position:fixed; inset:0; display:grid; place-items:center;
+  background: radial-gradient(1200px 500px at 50% -10%, rgba(139,0,0,.35), transparent 60%), #12080c;
+  color:#f5e9ee; z-index:9999;
+  transition:opacity .35s ease, visibility .35s ease;
 }
-#citizens button:hover { background:#444; }
-#citizens li { position:relative; overflow:hidden; }
-.social { display:flex; gap:.6rem; flex-wrap:wrap; justify-content:center; }
-.social a { background:#222; color:#eee; padding:.6rem .9rem; border-radius:10px; text-decoration:none; }
-.social a:hover { background:#333; }
-#admin-panel { display:grid; gap:.5rem; max-width:520px; margin:.5rem auto; }
-#decree-text { min-height:100px; padding:.7rem; border:0; border-radius:10px; background:#222; color:#eee; }
-#decrees { list-style:none; padding:0; max-width:600px; margin:1rem auto; }
-#decrees li { background:#222; color:#eee; padding:.7rem .9rem; border-radius:10px; margin:.5rem 0; }
-#decrees time { opacity:.7; font-size:.9em; display:block; margin-top:.25rem; }
+#splash.hide{opacity:0; visibility:hidden; pointer-events:none}
+#splash h1{font-size:2.4rem; margin:.2rem 0 .4rem}
+#splash .motto{opacity:.95}
+
+/* --- Social / Council --- */
+.social{display:flex; gap:.6rem; flex-wrap:wrap; justify-content:center}
+.social a{
+  text-decoration:none; color:var(--text);
+  background: linear-gradient(180deg, #272036, #1b1728);
+  border:1px solid #3a3150; border-radius:12px;
+  padding:.6rem .9rem; box-shadow: var(--shadow);
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+.social a:hover{transform:translateY(-1px); box-shadow:0 12px 28px rgba(122,92,255,.25)}
+
+/* --- Decrees --- */
+#admin-panel{display:grid; gap:.6rem; max-width:640px; margin:.6rem auto}
+#decree-text{min-height:110px}
+#decrees{list-style:none; max-width:720px; margin:1rem auto}
+#decrees li{
+  composes: card;
+  background: linear-gradient(180deg, #1a1a25, #13131b);
+  text-align:left;
+}
+#decrees time{opacity:.7; font-size:.9em; display:block; margin-top:.35rem}
+
+/* --- Röstsalong (om du visar någon) --- */
+.voice{
+  display:inline-flex; align-items:center; gap:.4rem;
+  background:#181825; border:1px solid #302a45; border-radius:10px;
+  padding:.35rem .6rem; color:var(--muted)
+}
+
+/* --- Utility --- */
+.glow{box-shadow:0 0 24px rgba(122,92,255,.35)}
+.center{display:flex; justify-content:center; align-items:center}
+.max-600{max-width:600px; margin:0 auto}
+
+/* --- Footer --- */
+footer{color:var(--muted); padding:20px 0; opacity:.8}
+
+/* --- Responsivitet --- */
+@media (max-width:560px){
+  header.splash{padding:56px 14px 28px}
+  .site-nav a{padding:.45rem .7rem}
+  ul#citizens li{flex-wrap:wrap; gap:.4rem}
+  }
