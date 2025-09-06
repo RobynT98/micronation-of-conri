@@ -1,0 +1,32 @@
+body {
+  font-family: sans-serif;
+  background: #111;
+  color: #eee;
+  text-align: center;
+  margin: 0;
+}
+
+header {
+  padding: 2rem;
+  background: #222;
+}
+
+h1 {
+  font-size: 2.2rem;
+}
+
+.flag {
+  font-size: 4rem;
+}
+
+section {
+  margin: 2rem 0;
+}
+
+.law {
+  background: #222;
+  margin: 0.5rem auto;
+  padding: 0.8rem;
+  border-radius: 8px;
+  max-width: 400px;
+}
