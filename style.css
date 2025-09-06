@@ -58,3 +58,11 @@ ul#citizens li { background:#222; margin:.4rem 0; padding:.6rem .8rem; border-ra
   transition:opacity .35s ease, visibility .35s ease; }
 #splash.hide { opacity:0; visibility:hidden; pointer-events:none; }
 body.splashing { overflow:hidden; } /* lås scroll medan splash syns */
+
+/* actions-knappar i listan */
+#citizens button {
+  background:#333; color:#eee; border:0; border-radius:8px;
+  padding:.35rem .6rem; cursor:pointer;
+}
+#citizens button:hover { background:#444; }
+#citizens li { position:relative; overflow:hidden; }
