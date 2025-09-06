@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Micronation of Conri</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body { font-family: sans-serif; background: #111; color: #eee; text-align: center; }
+    header { padding: 2rem; }
+    h1 { font-size: 2.2rem; }
+    .flag { font-size: 4rem; }
+    .section { margin: 2rem 0; }
+    .law { background: #222; margin: 0.5rem; padding: 0.8rem; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="flag">🏴‍☠️</div>
+    <h1>Micronation of Conri</h1>
+    <p>Motto: *Strength through play, order through chaos*</p>
+  </header>
+
+  <main>
+    <section class="section">
+      <h2>Constitution</h2>
+      <div class="law">Law 1: Respect the hierarchy of the realm.</div>
+      <div class="law">Law 2: Roleplay is binding within the borders.</div>
+      <div class="law">Law 3: Currency of the realm is earned, not given.</div>
+    </section>
+
+    <section class="section">
+      <h2>Citizens</h2>
+      <ul id="citizens"></ul>
+      <button onclick="addCitizen()">Join as Citizen</button>
+    </section>
+  </main>
+
+  <script>
+    const citizens = [];
+    function addCitizen() {
+      const name = prompt("Enter your citizen name:");
+      if(name) {
+        citizens.push(name);
+        renderCitizens();
+      }
+    }
+    function renderCitizens() {
+      const list = document.getElementById('citizens');
+      list.innerHTML = "";
+      citizens.forEach(c => {
+        const li = document.createElement('li');
+        li.textContent = c;
+        list.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>
